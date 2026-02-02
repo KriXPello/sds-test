@@ -10,10 +10,30 @@ import type {
 import type { WeatherInfo, CityInfo } from '~/types/models';
 import { wrapAxios } from '~/api/utils';
 
+const API_KEY_ENV = import.meta.env.OPENWEATHERMAP_API_KEY;
+const STORAGE_API_KEY = 'openweathermap-api-key';
+const getApiKey = () => {
+  if (API_KEY_ENV != 'ask') {
+    return API_KEY_ENV;
+  }
+
+  const savedKey = sessionStorage.getItem(STORAGE_API_KEY);
+  if (savedKey) {
+    return savedKey;
+  }
+
+  let apiKey: string | null = null;
+  while (!apiKey || !apiKey.trim()) {
+    apiKey = window.prompt('Введите API ключ OpenWeatherMap (будет сохранен в сессионном хранилище)');
+  }
+  sessionStorage.setItem(STORAGE_API_KEY, apiKey);
+  return apiKey;
+};
+
 const openweatherAxios = axios.create({
   baseURL: import.meta.env.OPENWEATHERMAP_API_BASE_URL,
   params: {
-    appid: import.meta.env.OPENWEATHERMAP_API_KEY,
+    appid: getApiKey(),
   },
 });
 
