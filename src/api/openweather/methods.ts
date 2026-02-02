@@ -4,6 +4,8 @@ import type {
   WeatherApiResponse,
   CitiesInfoFetchOtions,
   GeoDirectApiResponse,
+  GeoReverseApiRespone,
+  CitiesByCoordsFetchOptions,
 } from './types';
 import type { WeatherInfo, CityInfo } from '~/types/models';
 import { wrapAxios } from '~/api/utils';
@@ -44,6 +46,27 @@ export const fetchCitiesInfo = wrapAxios<CitiesInfoFetchOtions, CityInfo[]>(asyn
     params: {
       q: options.searchQuery,
       limit: 5,
+    },
+    signal,
+  });
+  return data.map<CityInfo>((x) => {
+    const name = x.local_names?.ru || x.local_names?.en || x.name;
+    return {
+      country: x.country,
+      latitude: x.lat,
+      longitude: x.lon,
+      name,
+      state: x.state,
+    };
+  });
+});
+
+export const fetchCitiesByCoords = wrapAxios<CitiesByCoordsFetchOptions, CityInfo[]>(async (options, signal) => {
+  const { data } = await openweatherAxios.get<GeoReverseApiRespone>('/geo/1.0/reverse', {
+    params: {
+      lat: options.latitude,
+      lon: options.longitude,
+      limit: 3,
     },
     signal,
   });

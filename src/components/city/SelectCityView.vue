@@ -12,6 +12,15 @@
           <ElIcon><Search /></ElIcon>
         </template>
       </ElInput>
+
+      <ElButton
+        title="Определить местоположение"
+        :icon="MapLocation"
+        type="primary"
+        :loading="locationLoading"
+        :disabled="locationLoading"
+        @click="handleFindLocation"
+      />
     </div>
 
     <div class="select-city-view__content">
@@ -19,7 +28,7 @@
         <!-- подсказки из поиска -->
         <div
           v-if="suggestions.length"
-          v-loading="loading"
+          v-loading="citiesLoading"
           class="city-list select-city-view__block"
         >
           <CityCard
@@ -32,8 +41,8 @@
         </div>
         <!-- индикатор загрузки пока нет подсказок -->
         <div
-          v-else-if="loading"
-          v-loading="loading"
+          v-else-if="citiesLoading"
+          v-loading="citiesLoading"
           class="select-city-view__loading-placeholder select-city-view__block"
         />
 
@@ -64,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { Search } from '@element-plus/icons-vue';
-import { ElIcon, ElInput, ElScrollbar, vLoading } from 'element-plus';
+import { Search, MapLocation } from '@element-plus/icons-vue';
+import { ElButton, ElIcon, ElInput, ElScrollbar, vLoading } from 'element-plus';
 import { ErrorWithRetry } from '~/components/base';
 import type { CityInfo } from '~/types/models';
 import CityCard from './CityCard.vue';
@@ -75,13 +84,15 @@ defineProps<{
   recent: CityInfo[];
   query: string;
   error?: string | null;
-  loading?: boolean;
+  citiesLoading?: boolean;
+  locationLoading?: boolean;
 }>();
 
 const emit = defineEmits<{
   'update:query': [value: string];
   select: [value: CityInfo];
   retry: [];
+  'find-location': [];
 }>();
 
 const handleRetrySearch = () => {
@@ -90,6 +101,10 @@ const handleRetrySearch = () => {
 
 const handleSelectCity = (city: CityInfo) => {
   emit('select', city);
+};
+
+const handleFindLocation = () => {
+  emit('find-location');
 };
 
 </script>
@@ -117,6 +132,10 @@ const handleSelectCity = (city: CityInfo) => {
   margin-bottom: 16px;
 }
 
+.header {
+  display: flex;
+  gap: 4px;
+}
 .header__navbar {
   width: 100%;
 }

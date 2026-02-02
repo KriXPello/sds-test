@@ -13,7 +13,6 @@
             title="Изменить"
             :icon="Edit"
             type="primary"
-            :auto-insert-space="false"
             @click="openSelectCity"
           />
           <ElButton
@@ -22,7 +21,6 @@
             :icon="Refresh"
             :loading="weatherLoading"
             type="warning"
-            :auto-insert-space="false"
             @click="handleRefresh(selectedCity)"
           />
         </template>
@@ -34,7 +32,7 @@
         :loading="weatherLoading"
         :weather="weather"
         :icon-url="iconUrl"
-        @retry="retryLoadWeather(selectedCity)"
+        @retry="handleRetryLoadWeather(selectedCity)"
       />
     </div>
 
@@ -57,22 +55,33 @@
         v-model:query="query"
         class="main__secondary-city"
         :error="citiesError"
-        :loading="citiesLoading"
+        :cities-loading="citiesLoading"
+        :location-loading="currentCityLoading"
         :suggestions="cities"
         :recent="recentCities"
         @select="handleCitySelect"
+        @retry="handleRetryCitySearch"
+        @find-location="handleFindLocation"
       />
     </div>
+
+    <CitySuggestDialog
+      v-if="currentCity"
+      :city="currentCity"
+      @submit="handleSubmitCurrentCity(currentCity)"
+      @cancel="handleCancelCurrentCity"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { Edit, Refresh } from '@element-plus/icons-vue';
-import { ElButton, ElPageHeader } from 'element-plus';
-import { ref, watch } from 'vue';
-import { SelectCityView, CityCard } from '~/components/city';
+import { ElButton, ElMessage, ElPageHeader } from 'element-plus';
+import { onMounted, ref, watch } from 'vue';
+import { CityCard, CitySuggestDialog, SelectCityView } from '~/components/city';
 import { WeatherView } from '~/components/weather';
 import { useCities } from '~/composables/useCities';
+import { useCurrentCity } from '~/composables/useCurrentCity';
 import { useRecentCities } from '~/composables/useRecentCities';
 import { useWeather } from '~/composables/useWeather';
 import type { CityInfo } from '~/types/models';
@@ -120,26 +129,78 @@ watch(query, (newQuery) => {
   searchCitiesDebounced(newQuery);
 });
 
+const handleRetryCitySearch = () => {
+  searchCities(query.value);
+};
+
 const { recentCities, addRecentCity } = useRecentCities();
 
 const selectedCity = ref<CityInfo | null>(null);
+watch(selectedCity, (city) => {
+  if (city == null) return;
+  loadWeather({
+    latitude: city.latitude,
+    longitude: city.longitude,
+  });
+});
+
 const handleCitySelect = (cityInfo: CityInfo) => {
   query.value = '';
   selectedCity.value = cityInfo;
   closeSelectCity();
   addRecentCity(cityInfo);
-  loadWeather({
-    latitude: cityInfo.latitude,
-    longitude: cityInfo.longitude,
-  });
 };
 
-const retryLoadWeather = (city: CityInfo) => {
+const handleRetryLoadWeather = (city: CityInfo) => {
   loadWeather({
     latitude: city.latitude,
     longitude: city.longitude,
   });
 };
+
+const {
+  currentCity,
+  error: currentCityError,
+  isLoading: currentCityLoading,
+  loadCurrentCity,
+} = useCurrentCity();
+
+watch(currentCityError, (error) => {
+  if (!error) return;
+  ElMessage({
+    message: error,
+    type: 'warning',
+    placement: 'bottom',
+  });
+});
+
+const handleCancelCurrentCity = () => {
+  currentCity.value = null;
+};
+
+const handleSubmitCurrentCity = (city: CityInfo) => {
+  selectedCity.value = city;
+  currentCity.value = null;
+  closeSelectCity();
+  addRecentCity(city);
+};
+
+const handleFindLocation = () => {
+  loadCurrentCity();
+};
+
+onMounted(() => {
+  const [lastRecentCity] = recentCities.value;
+  if (lastRecentCity) {
+    selectedCity.value = lastRecentCity;
+  } else {
+    ElMessage.info({
+      message: 'Получение данных геолокации...',
+      duration: 2000,
+    });
+    loadCurrentCity();
+  }
+});
 
 </script>
 

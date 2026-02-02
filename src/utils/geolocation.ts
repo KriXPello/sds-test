@@ -22,7 +22,7 @@ export type GetGeolocationResult = {
 export const getGeolocation = (): Promise<GetGeolocationResult> => {
   return new Promise<GetGeolocationResult>((resolve) => {
     if (!navigator.geolocation) {
-      resolve({ error: GeolocationErrorKind.PermissionDenied });
+      resolve({ error: GeolocationErrorKind.NotSupported });
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -31,6 +31,7 @@ export const getGeolocation = (): Promise<GetGeolocationResult> => {
         const kind = errorsMap[err.code] ?? GeolocationErrorKind.Unexpected;
         resolve({ error: kind });
       },
+      { timeout: 8000 },
     );
   });
 };

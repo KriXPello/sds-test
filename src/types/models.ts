@@ -24,3 +24,8 @@ export type WeatherInfo = {
   /** пример: преимущественно облачно */
   description: string;
 };
+
+export type GeolocationInfo = {
+  latitude: number;
+  longitude: number;
+};
