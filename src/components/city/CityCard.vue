@@ -33,9 +33,14 @@ defineProps<{
   display: flex;
   justify-content: space-between;
   padding: 6px 12px;
+  transition: background-color 0.2s ease;
+  background-color: var(--bg-color);
 }
 .city-card_clickable {
   cursor: pointer;
+}
+.city-card_clickable:hover {
+  background-color: #f6f6f6;
 }
 
 .city-card__info {

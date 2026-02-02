@@ -21,7 +21,7 @@
             :icon="Refresh"
             :loading="weatherLoading"
             type="warning"
-            @click="handleRefresh"
+            @click="handleReloadWeather"
           />
         </template>
       </CityCard>
@@ -32,7 +32,7 @@
         :loading="weatherLoading"
         :weather="weather"
         :icon-url="iconUrl"
-        @retry="handleRetryLoadWeather"
+        @retry="handleReloadWeather"
       />
     </div>
 
@@ -95,16 +95,6 @@ const {
   loadWeather,
 } = useWeather();
 
-const handleRefresh = () => {
-  const data = weather.value;
-  if (data == null) return;
-
-  loadWeather({
-    latitude: data.cityLatitude,
-    longitude: data.cityLongitude,
-  });
-};
-
 const isOpenSelectCity = ref(false);
 const openSelectCity = () => {
   isOpenSelectCity.value = true;
@@ -154,7 +144,7 @@ const handleCitySelect = (cityInfo: CityInfo) => {
   addRecentCity(cityInfo);
 };
 
-const handleRetryLoadWeather = () => {
+const handleReloadWeather = () => {
   const city = selectedCity.value;
   if (city == null) return;
 
