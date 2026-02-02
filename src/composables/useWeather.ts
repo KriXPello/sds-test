@@ -11,7 +11,7 @@ export const useWeather = (initialData?: WeatherInfo) => {
   const iconUrl = computed(() => {
     const iconName = weather.value?.iconName;
     if (!iconName) return null;
-    const url = new URL(`${iconName}.png`, import.meta.env.OPENWEATHERMAP_ICON_BASE_URL);
+    const url = new URL(`${iconName}@2x.png`, import.meta.env.OPENWEATHERMAP_ICON_BASE_URL);
     return url.href;
   });
 

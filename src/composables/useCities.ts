@@ -10,10 +10,15 @@ export const useCities = () => {
 
   let abortController: AbortController | null = null;
 
+  const cancelSearchCities = () => {
+    abortController?.abort();
+  };
+
   /**
    * ! Прерывает предыдущий запрос при повторном вызове до завершения
    */
   const searchCities = async (query: string) => {
+    error.value = null;
     abortController?.abort();
 
     if (!query.trim()) {
@@ -23,7 +28,6 @@ export const useCities = () => {
 
     abortController = new AbortController();
     isLoading.value = true;
-    error.value = null;
 
     try {
       cities.value = await fetchCitiesInfo(
@@ -46,5 +50,6 @@ export const useCities = () => {
     isLoading,
     error,
     searchCities,
+    cancelSearchCities,
   };
 };

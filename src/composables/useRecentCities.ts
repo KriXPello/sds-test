@@ -17,7 +17,9 @@ export const useRecentCities = () => {
       }
     }
   });
-  watch(recentCities, (list) => localStorage.setItem(RECENT_CITIES_KEY, JSON.stringify(list)));
+  watch(recentCities, (list) => {
+    localStorage.setItem(RECENT_CITIES_KEY, JSON.stringify(list));
+  }, { deep: true });
 
   const addRecentCity = (city: CityInfo) => {
     const recentList = recentCities.value.slice();
