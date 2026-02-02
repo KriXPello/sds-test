@@ -21,7 +21,7 @@
             :icon="Refresh"
             :loading="weatherLoading"
             type="warning"
-            @click="handleRefresh(selectedCity)"
+            @click="handleRefresh"
           />
         </template>
       </CityCard>
@@ -32,7 +32,7 @@
         :loading="weatherLoading"
         :weather="weather"
         :icon-url="iconUrl"
-        @retry="handleRetryLoadWeather(selectedCity)"
+        @retry="handleRetryLoadWeather"
       />
     </div>
 
@@ -68,7 +68,7 @@
     <CitySuggestDialog
       v-if="currentCity"
       :city="currentCity"
-      @submit="handleSubmitCurrentCity(currentCity)"
+      @submit="handleSubmitCurrentCity"
       @cancel="handleCancelCurrentCity"
     />
   </div>
@@ -95,10 +95,13 @@ const {
   loadWeather,
 } = useWeather();
 
-const handleRefresh = (city: CityInfo) => {
+const handleRefresh = () => {
+  const data = weather.value;
+  if (data == null) return;
+
   loadWeather({
-    latitude: city.latitude,
-    longitude: city.longitude,
+    latitude: data.cityLatitude,
+    longitude: data.cityLongitude,
   });
 };
 
@@ -151,7 +154,10 @@ const handleCitySelect = (cityInfo: CityInfo) => {
   addRecentCity(cityInfo);
 };
 
-const handleRetryLoadWeather = (city: CityInfo) => {
+const handleRetryLoadWeather = () => {
+  const city = selectedCity.value;
+  if (city == null) return;
+
   loadWeather({
     latitude: city.latitude,
     longitude: city.longitude,
@@ -178,7 +184,10 @@ const handleCancelCurrentCity = () => {
   currentCity.value = null;
 };
 
-const handleSubmitCurrentCity = (city: CityInfo) => {
+const handleSubmitCurrentCity = () => {
+  const city = currentCity.value;
+  if (city == null) return;
+
   selectedCity.value = city;
   currentCity.value = null;
   closeSelectCity();
