@@ -2,7 +2,8 @@
   <ElDialog
     :model-value="true"
     title="Подтверждение"
-    width="500"
+    width="min(90%, 380px)"
+    @close="handleCancel"
   >
     <ElText>Вы находитесь в этом городе?</ElText>
     <CityCard :data="city" />

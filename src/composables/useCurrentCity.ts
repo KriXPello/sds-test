@@ -17,6 +17,7 @@ export const useCurrentCity = () => {
   let abortController: AbortController | null = null;
 
   const loadCurrentCity = async () => {
+    currentCity.value = null;
     isLoading.value = true;
     error.value = null;
     try {
